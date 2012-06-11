@@ -239,13 +239,14 @@
                 'destroy',
                 'render',
                 'render_subview',
-                'insert_subview_elem',
+                'insert_subview',
                 'get_template_context',
                 'get_subview_options',
                 'get_subview_identifier',
                 'get_subview_render_options',
                 'unrender',
                 'unrender_subviews',
+                'remove_subviews',
                 'get_items',
                 'bind_events',
                 'unbind_events',
@@ -285,6 +286,12 @@
                 subview.unrender();
             });
         },
+        remove_subviews: function(){
+            var self = this;
+            _.each(this.subviews, function(subview, identifier){
+                self.remove_subview(subview);
+            });
+        },
         get_items: function(){
             return [];
         },
@@ -301,8 +308,8 @@
             return self;
         },
         render_subview: function(options){
-            this.insert_subview_elem(options);
             var subview = new this.item_view(options);
+            this.insert_subview(subview);
             var render_options = this.get_subview_render_options();
             subview.render(render_options);
             this.subviews[this.get_subview_identifier(subview)] = subview;
@@ -323,7 +330,7 @@
         get_subview_render_options: function(){
 
         },
-        insert_subview_elem: function(subview_options){
+        insert_subview: function(subview){
 
         },
         add_subview: function(evt){
@@ -589,7 +596,7 @@
                 'show_item_details',
                 'hide_item_details',
                 'get_item_details_options',
-                'insert_item_details_elem',
+                'insert_item_details_view',
                 'bind_item_details_events',
                 'unbind_item_details_events',
                 'load_more'
@@ -604,7 +611,7 @@
                 this.collection.on('change', this.model_changed);
                 this.collection.on("remove", this.model_removed);
                 this.collection.on("destroy", this.model_destroyed);
-                this.collection.on('reset', this.unrender_subviews);
+                this.collection.on('reset', this.remove_subviews);
             }
         },
         unbind_events: function(){
@@ -614,7 +621,7 @@
                 this.collection.off('change', this.model_changed);
                 this.collection.off("remove", this.model_removed);
                 this.collection.off("destroy", this.model_removed);
-                this.collection.off('reset', this.unrender_subviews);
+                this.collection.off('reset', this.remove_subviews);
             }
         },
         bind_subview_events: function(subview){
@@ -684,11 +691,11 @@
             this.bind_item_details_events();
         },
         render_item_details: function(options){
-            this.insert_item_details_elem(options.el);
             this.item_details = new this.item_details_view(options);
+            this.insert_item_details_view(this.item_details);
             this.item_details.render();
         },
-        insert_item_details_elem: function(el){
+        insert_item_details_view: function(item_details_view){
 
         },
         hide_item_details: function(){
@@ -798,9 +805,9 @@
         unbind_subview_events: function(subview){
             subview.off("filter_chosen", this.on_item_filter);
         },
-        insert_subview_elem: function(subview_options){
+        insert_subview: function(subview){
             var $after = this.$("li.list-item").length ? this.$("li.list-item:last") : this.$(".items-divider");
-            $after.after(subview_options.el);
+            $after.after(subview.$el);
         },
         mark_chosen_filter: function(filter_value){
             if (!filter_value){
@@ -869,8 +876,8 @@
             subview.off("remove_empty_line_clicked", this.remove_subview);
             subview.off("created_model", self.subview_added_model);
         },
-        insert_subview_elem: function(subview_options){
-            this.$("div.control-group:last").before(subview_options.el);
+        insert_subview: function(subview){
+            this.$("div.control-group:last").before(subview.$el);
         },
         get_subview_render_options: function(){
             return {
