@@ -33,6 +33,8 @@
                     data[key] = value.id;
                 }else if(_.isArray(value) && !isNaN(value[0])){
                     data[key] = value[0];
+                }else if (value === null){
+                    data[key] = "";
                 }
             });
             options.data = $.param(data);
@@ -53,6 +55,12 @@
         },
         parse: function(resp, xhr) {
             return resp.object;
+        },
+        url: function(){
+            var url = Backbone.Model.prototype.url.apply(this, arguments);
+            if (url.slice(-1) != '/')
+                return url + '/'; // It's nice when all urls end with a slash...
+            return url;
         }
     });
 
